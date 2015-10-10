@@ -5,7 +5,7 @@ import (
 	"fmt"
 	"log"
 
-	_ "github.com/lib/pq"
+	pq "github.com/lib/pq"
 )
 
 func main() {
@@ -25,6 +25,35 @@ VALUES('Fight Club', 'Chuck Palahniuk', 208) RETURNING id`).Scan(&bookID)
 	fmt.Printf("ID: %v\n", bookID)
 
 	//Retrieve
+	rows, err := db.Query(`SELECT id, name, author, pages, publication_date FROM books WHERE id = $1`, bookID)
+	defer rows.Close()
+	if err == nil {
+		for rows.Next() {
+			var id int
+			var name string
+			var author string
+			var pages int
+			var publicationDate pq.NullTime
+
+			err = rows.Scan(&id, &name, &author, &pages, &publicationDate)
+			if err == nil {
+				fmt.Printf("id: %v\n", id)
+				fmt.Printf("name: %v\n", name)
+				fmt.Printf("author: %v\n", author)
+				fmt.Printf("pages: %v\n", pages)
+				if publicationDate.Valid {
+					fmt.Printf("publicationDate: %v\n", publicationDate.Time)
+				} else {
+					fmt.Printf("publicationDate: null\n")
+				}
+			} else {
+				fmt.Printf("err: %v\n", err)
+			}
+
+		}
+	} else {
+		fmt.Printf("err: %v\n", err)
+	}
 
 	//Update
 
