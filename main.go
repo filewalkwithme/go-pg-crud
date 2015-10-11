@@ -4,6 +4,7 @@ import (
 	"database/sql"
 	"fmt"
 	"log"
+	"time"
 
 	pq "github.com/lib/pq"
 )
@@ -47,15 +48,20 @@ VALUES('Fight Club', 'Chuck Palahniuk', 208) RETURNING id`).Scan(&bookID)
 					fmt.Printf("publicationDate: null\n")
 				}
 			} else {
-				fmt.Printf("err: %v\n", err)
+				log.Fatalf("err: %v\n", err)
 			}
 
 		}
 	} else {
-		fmt.Printf("err: %v\n", err)
+		log.Fatalf("err: %v\n", err)
 	}
 
 	//Update
+	var newPublicationDate = time.Date(1996, time.August, 17, 0, 0, 0, 0, time.UTC)
+	_, err = db.Exec(`UPDATE books SET publication_date = $1 where id = $2`, newPublicationDate, bookID)
+	if err != nil {
+		log.Fatalf("err: %v\n", err)
+	}
 
 	//Delete
 
