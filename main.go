@@ -23,7 +23,7 @@ VALUES('Fight Club', 'Chuck Palahniuk', 208) RETURNING id`).Scan(&bookID)
 	if err != nil {
 		log.Fatal(err)
 	}
-	fmt.Printf("ID: %v\n", bookID)
+	fmt.Printf("Last inserted ID: %v\n", bookID)
 
 	//Retrieve
 	rows, err := db.Query(`SELECT id, name, author, pages, publication_date FROM books WHERE id = $1`, bookID)
@@ -58,11 +58,26 @@ VALUES('Fight Club', 'Chuck Palahniuk', 208) RETURNING id`).Scan(&bookID)
 
 	//Update
 	var newPublicationDate = time.Date(1996, time.August, 17, 0, 0, 0, 0, time.UTC)
-	_, err = db.Exec(`UPDATE books SET publication_date = $1 where id = $2`, newPublicationDate, bookID)
+	res, err := db.Exec(`UPDATE books SET publication_date = $1 where id = $2`, newPublicationDate, bookID)
 	if err != nil {
 		log.Fatalf("err: %v\n", err)
 	}
 
-	//Delete
+	rowsUpdated, err := res.RowsAffected()
+	if err != nil {
+		log.Fatalf("err: %v\n", err)
+	}
+	fmt.Printf("Number of rows updated: %v\n", rowsUpdated)
 
+	//Delete
+	res, err = db.Exec(`delete from books where id = $1`, bookID)
+	if err != nil {
+		log.Fatalf("err: %v\n", err)
+	}
+
+	rowsDeleted, err := res.RowsAffected()
+	if err != nil {
+		log.Fatalf("err: %v\n", err)
+	}
+	fmt.Printf("Number of rows deleted: %v\n", rowsDeleted)
 }
