@@ -8,8 +8,10 @@ import (
 )
 
 func main() {
+	http.Handle("/assets/", http.StripPrefix("/assets/", http.FileServer(http.Dir("www/assets"))))
+
 	http.HandleFunc("/", func(w http.ResponseWriter, r *http.Request) {
-		buf, err := ioutil.ReadFile("./index.html")
+		buf, err := ioutil.ReadFile("www/index.html")
 		if err != nil {
 			log.Fatal(err)
 		}
