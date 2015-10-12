@@ -2,14 +2,18 @@ package main
 
 import (
 	"fmt"
-	"html"
+	"io/ioutil"
 	"log"
 	"net/http"
 )
 
 func main() {
-	http.HandleFunc("/bar", func(w http.ResponseWriter, r *http.Request) {
-		fmt.Fprintf(w, "Hello, %q", html.EscapeString(r.URL.Path))
+	http.HandleFunc("/", func(w http.ResponseWriter, r *http.Request) {
+		buf, err := ioutil.ReadFile("./index.html")
+		if err != nil {
+			log.Fatal(err)
+		}
+		fmt.Fprintf(w, string(buf))
 	})
 
 	log.Fatal(http.ListenAndServe(":8080", nil))
