@@ -1,11 +1,24 @@
 package main
 
 import (
-	"fmt"
 	"io/ioutil"
 	"log"
 	"net/http"
+	"text/template"
+	"time"
 )
+
+type indexPage struct {
+	Books []book
+}
+
+type book struct {
+	ID              int
+	Name            string
+	Author          string
+	PublicationDate time.Time
+	Pages           int
+}
 
 func main() {
 	http.Handle("/assets/", http.StripPrefix("/assets/", http.FileServer(http.Dir("www/assets"))))
@@ -15,7 +28,14 @@ func main() {
 		if err != nil {
 			log.Fatal(err)
 		}
-		fmt.Fprintf(w, string(buf))
+
+		var page = indexPage{Books: allBooks()}
+
+		indexPage := string(buf)
+
+		t := template.Must(template.New("indexPage").Parse(indexPage))
+
+		t.Execute(w, page)
 	})
 
 	log.Fatal(http.ListenAndServe(":8080", nil))

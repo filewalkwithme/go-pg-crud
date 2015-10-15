@@ -81,3 +81,42 @@ VALUES('Fight Club', 'Chuck Palahniuk', 208) RETURNING id`).Scan(&bookID)
 	}
 	fmt.Printf("Number of rows deleted: %v\n", rowsDeleted)
 }
+
+func allBooks() []book {
+	db, err := sql.Open("postgres", "user=postgres dbname=books_database sslmode=disable")
+	if err != nil {
+		log.Fatal(err)
+	}
+
+	//Retrieve
+	books := []book{}
+
+	rows, err := db.Query(`SELECT id, name, author, pages, publication_date FROM books order by id`)
+	defer rows.Close()
+	if err == nil {
+		for rows.Next() {
+			var id int
+			var name string
+			var author string
+			var pages int
+			var publicationDate pq.NullTime
+
+			err = rows.Scan(&id, &name, &author, &pages, &publicationDate)
+			if err == nil {
+				currentBook := book{ID: id, Name: name, Author: author, Pages: pages}
+				if publicationDate.Valid {
+					currentBook.PublicationDate = publicationDate.Time
+				}
+
+				books = append(books, currentBook)
+			} else {
+				log.Fatalf("err: %v\n", err)
+			}
+
+		}
+	} else {
+		log.Fatalf("err: %v\n", err)
+	}
+
+	return books
+}
