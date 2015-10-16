@@ -38,5 +38,20 @@ func main() {
 		t.Execute(w, page)
 	})
 
+	http.HandleFunc("/book.html", func(w http.ResponseWriter, r *http.Request) {
+		buf, err := ioutil.ReadFile("www/book.html")
+		if err != nil {
+			log.Fatal(err)
+		}
+
+		var page = indexPage{Books: allBooks()}
+
+		indexPage := string(buf)
+
+		t := template.Must(template.New("indexPage").Parse(indexPage))
+
+		t.Execute(w, page)
+	})
+
 	log.Fatal(http.ListenAndServe(":8080", nil))
 }
