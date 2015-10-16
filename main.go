@@ -4,6 +4,7 @@ import (
 	"io/ioutil"
 	"log"
 	"net/http"
+	"strconv"
 	"text/template"
 	"time"
 )
@@ -30,11 +31,8 @@ func main() {
 		}
 
 		var page = indexPage{Books: allBooks()}
-
 		indexPage := string(buf)
-
 		t := template.Must(template.New("indexPage").Parse(indexPage))
-
 		t.Execute(w, page)
 	})
 
@@ -45,12 +43,33 @@ func main() {
 		}
 
 		var page = indexPage{Books: allBooks()}
-
 		indexPage := string(buf)
-
-		t := template.Must(template.New("indexPage").Parse(indexPage))
-
+		t := template.Must(template.New("bookPage").Parse(indexPage))
 		t.Execute(w, page)
+	})
+
+	http.HandleFunc("/save", func(w http.ResponseWriter, r *http.Request) {
+		r.ParseForm()
+		v := r.PostForm
+		name := v.Get("name")
+		author := v.Get("author")
+
+		pagesStr := v.Get("pages")
+		pages := 0
+		if len(pagesStr) > 0 {
+			pages, _ = strconv.Atoi(pagesStr)
+		}
+
+		publicationDateStr := v.Get("publicationDate")
+		var publicationDate time.Time
+
+		if len(publicationDateStr) > 0 {
+			publicationDate, _ = time.Parse("2006-01-02", publicationDateStr)
+		}
+
+		insertBook(name, author, pages, publicationDate)
+
+		http.Redirect(w, r, "/", 302)
 	})
 
 	log.Fatal(http.ListenAndServe(":8080", nil))

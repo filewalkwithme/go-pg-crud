@@ -49,7 +49,7 @@
         <div class="col-sm-9 col-md-8 col-md-offset-2 main">
           <h1 class="page-header">Book</h1>
 
-          <form>
+          <form method="post" action="/save">
             <div class="form-group">
               <label for="inputName">ID</label>
               <span class="form-control"></span>
@@ -57,22 +57,22 @@
 
             <div class="form-group">
               <label for="inputName">Name</label>
-              <input class="form-control" id="inputName" placeholder="Name">
+              <input class="form-control" id="inputName" name="name" placeholder="Name">
             </div>
 
             <div class="form-group">
               <label for="inputAuthor">Author</label>
-              <input class="form-control" id="inputAuthor" placeholder="Author">
+              <input class="form-control" id="inputAuthor" name="author" placeholder="Author">
             </div>
 
             <div class="form-group">
               <label for="inputPages">Pages</label>
-              <input class="form-control" id="inputPages" placeholder="Pages">
+              <input class="form-control" id="inputPages" name="pages" placeholder="Pages">
             </div>
 
             <div class="form-group">
               <label for="inputPublicationDate">Publication date</label>
-              <input class="form-control" id="inputPublicationDate" placeholder="YYYY-MM-DD">
+              <input class="form-control" id="inputPublicationDate" name="publicationDate" placeholder="YYYY-MM-DD">
             </div>
 
             <button type="submit" class="btn btn-default">Submit</button>
