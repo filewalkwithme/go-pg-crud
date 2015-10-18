@@ -95,5 +95,18 @@ func main() {
 		http.Redirect(w, r, "/", 302)
 	})
 
+	http.HandleFunc("/delete", func(w http.ResponseWriter, r *http.Request) {
+		v := r.URL.Query()
+		idStr := v.Get("id")
+
+		if len(idStr) > 0 {
+			id, _ := strconv.Atoi(idStr)
+
+			removeBook(id)
+		}
+
+		http.Redirect(w, r, "/", 302)
+	})
+
 	log.Fatal(http.ListenAndServe(":8080", nil))
 }

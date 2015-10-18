@@ -9,28 +9,14 @@ import (
 	"github.com/lib/pq"
 )
 
-func crud() {
+func removeBook(bookID int) {
 	db, err := sql.Open("postgres", "user=postgres dbname=books_database sslmode=disable")
 	if err != nil {
 		log.Fatal(err)
 	}
 
-	//Update
-	var bookID int
-	var newPublicationDate = time.Date(1996, time.August, 17, 0, 0, 0, 0, time.UTC)
-	res, err := db.Exec(`UPDATE books SET publication_date = $1 where id = $2`, newPublicationDate, bookID)
-	if err != nil {
-		log.Fatalf("err: %v\n", err)
-	}
-
-	rowsUpdated, err := res.RowsAffected()
-	if err != nil {
-		log.Fatalf("err: %v\n", err)
-	}
-	fmt.Printf("Number of rows updated: %v\n", rowsUpdated)
-
 	//Delete
-	res, err = db.Exec(`delete from books where id = $1`, bookID)
+	res, err := db.Exec(`delete from books where id = $1`, bookID)
 	if err != nil {
 		log.Fatalf("err: %v\n", err)
 	}
@@ -50,8 +36,7 @@ func insertBook(name, author string, pages int, publicationDate time.Time) int {
 
 	//Create
 	var bookID int
-	err = db.QueryRow(`INSERT INTO books(name, author, pages, publication_date)
-VALUES($1, $2, $3, $4) RETURNING id`, name, author, pages, publicationDate).Scan(&bookID)
+	err = db.QueryRow(`INSERT INTO books(name, author, pages, publication_date) VALUES($1, $2, $3, $4) RETURNING id`, name, author, pages, publicationDate).Scan(&bookID)
 
 	if err != nil {
 		log.Fatal(err)
