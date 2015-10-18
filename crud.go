@@ -60,6 +60,23 @@ VALUES($1, $2, $3, $4) RETURNING id`, name, author, pages, publicationDate).Scan
 	return bookID
 }
 
+func updateBook(id int, name, author string, pages int, publicationDate time.Time) int {
+	db, err := sql.Open("postgres", "user=postgres dbname=books_database sslmode=disable")
+	if err != nil {
+		log.Fatal(err)
+	}
+
+	//Create
+	var bookID int
+	err = db.QueryRow(`UPDATE books set name=$1, author=$2, pages=$3, publication_date=$4 where id=$5 RETURNING id`, name, author, pages, publicationDate, id).Scan(&bookID)
+
+	if err != nil {
+		log.Fatal(err)
+	}
+	fmt.Printf("Update ID: %v\n", bookID)
+	return bookID
+}
+
 func allBooks() []book {
 	db, err := sql.Open("postgres", "user=postgres dbname=books_database sslmode=disable")
 	if err != nil {

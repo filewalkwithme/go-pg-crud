@@ -64,6 +64,12 @@ func main() {
 	http.HandleFunc("/save", func(w http.ResponseWriter, r *http.Request) {
 		r.ParseForm()
 		v := r.PostForm
+		idStr := v.Get("id")
+		id := 0
+		if len(idStr) > 0 {
+			id, _ = strconv.Atoi(idStr)
+		}
+
 		name := v.Get("name")
 		author := v.Get("author")
 
@@ -80,7 +86,11 @@ func main() {
 			publicationDate, _ = time.Parse("2006-01-02", publicationDateStr)
 		}
 
-		insertBook(name, author, pages, publicationDate)
+		if id == 0 {
+			insertBook(name, author, pages, publicationDate)
+		} else {
+			updateBook(id, name, author, pages, publicationDate)
+		}
 
 		http.Redirect(w, r, "/", 302)
 	})
