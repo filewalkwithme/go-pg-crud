@@ -98,3 +98,25 @@ func allBooks() []book {
 
 	return books
 }
+
+func getBook(bookID int) book {
+	db, err := sql.Open("postgres", "user=postgres dbname=books_database sslmode=disable")
+	if err != nil {
+		log.Fatal(err)
+	}
+
+	//Retrieve
+	res := book{}
+
+	var id int
+	var name string
+	var author string
+	var pages int
+	var publicationDate pq.NullTime
+
+	err = db.QueryRow(`SELECT id, name, author, pages, publication_date FROM books where id = $1`, bookID).Scan(&id, &name, &author, &pages, &publicationDate)
+	if err == nil {
+		res = book{ID: id, Name: name, Author: author, Pages: pages, PublicationDate: publicationDate.Time}
+	}
+	return res
+}

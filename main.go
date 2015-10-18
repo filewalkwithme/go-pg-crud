@@ -13,6 +13,10 @@ type indexPage struct {
 	Books []book
 }
 
+type bookPage struct {
+	Book book
+}
+
 type book struct {
 	ID              int
 	Name            string
@@ -42,9 +46,18 @@ func main() {
 			log.Fatal(err)
 		}
 
-		var page = indexPage{Books: allBooks()}
-		indexPage := string(buf)
-		t := template.Must(template.New("bookPage").Parse(indexPage))
+		v := r.URL.Query()
+		idStr := v.Get("id")
+		currentBook := book{}
+		if len(idStr) > 0 {
+			id, _ := strconv.Atoi(idStr)
+
+			currentBook = getBook(id)
+		}
+
+		var page = bookPage{Book: currentBook}
+		bookPage := string(buf)
+		t := template.Must(template.New("bookPage").Parse(bookPage))
 		t.Execute(w, page)
 	})
 
