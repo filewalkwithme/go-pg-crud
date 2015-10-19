@@ -62,14 +62,14 @@ func updateBook(id int, name, author string, pages int, publicationDate time.Tim
 	return bookID
 }
 
-func allBooks() []book {
+func allBooks() []Book {
 	db, err := sql.Open("postgres", "user=postgres dbname=books_database sslmode=disable")
 	if err != nil {
 		log.Fatal(err)
 	}
 
 	//Retrieve
-	books := []book{}
+	books := []Book{}
 
 	rows, err := db.Query(`SELECT id, name, author, pages, publication_date FROM books order by id`)
 	defer rows.Close()
@@ -83,7 +83,7 @@ func allBooks() []book {
 
 			err = rows.Scan(&id, &name, &author, &pages, &publicationDate)
 			if err == nil {
-				currentBook := book{ID: id, Name: name, Author: author, Pages: pages}
+				currentBook := Book{ID: id, Name: name, Author: author, Pages: pages}
 				if publicationDate.Valid {
 					currentBook.PublicationDate = publicationDate.Time
 				}
@@ -101,14 +101,14 @@ func allBooks() []book {
 	return books
 }
 
-func getBook(bookID int) book {
+func getBook(bookID int) Book {
 	db, err := sql.Open("postgres", "user=postgres dbname=books_database sslmode=disable")
 	if err != nil {
 		log.Fatal(err)
 	}
 
 	//Retrieve
-	res := book{}
+	res := Book{}
 
 	var id int
 	var name string
@@ -118,7 +118,7 @@ func getBook(bookID int) book {
 
 	err = db.QueryRow(`SELECT id, name, author, pages, publication_date FROM books where id = $1`, bookID).Scan(&id, &name, &author, &pages, &publicationDate)
 	if err == nil {
-		res = book{ID: id, Name: name, Author: author, Pages: pages, PublicationDate: publicationDate.Time}
+		res = Book{ID: id, Name: name, Author: author, Pages: pages, PublicationDate: publicationDate.Time}
 	}
 	return res
 }

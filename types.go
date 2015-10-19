@@ -2,15 +2,20 @@ package main
 
 import "time"
 
-type indexPage struct {
-	Books []book
+//IndexPage represents the content of the index page, available on "/"
+//The index page shows a list of all books stored on db
+type IndexPage struct {
+	AllBooks []Book
 }
 
-type bookPage struct {
-	Book book
+//BookPage represents the content of the book page, available on "/book.html"
+//The book page shows info about a given book
+type BookPage struct {
+	TargetBook Book
 }
 
-type book struct {
+//Book represents a book object
+type Book struct {
 	ID              int
 	Name            string
 	Author          string

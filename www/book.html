@@ -52,28 +52,28 @@
           <form method="post" action="/save">
             <div class="form-group">
               <label for="inputName">ID</label>
-              <span class="form-control">{{.Book.ID}}</span>
-              <input type="hidden" id="inputID" name="id" value="{{.Book.ID}}"/>
+              <span class="form-control">{{.TargetBook.ID}}</span>
+              <input type="hidden" id="inputID" name="id" value="{{.TargetBook.ID}}"/>
             </div>
 
             <div class="form-group">
               <label for="inputName">Name</label>
-              <input class="form-control" id="inputName" name="name" placeholder="Name" value="{{.Book.Name}}"/>
+              <input class="form-control" id="inputName" name="name" placeholder="Name" value="{{.TargetBook.Name}}"/>
             </div>
 
             <div class="form-group">
               <label for="inputAuthor">Author</label>
-              <input class="form-control" id="inputAuthor" name="author" placeholder="Author" value="{{.Book.Author}}"/>
+              <input class="form-control" id="inputAuthor" name="author" placeholder="Author" value="{{.TargetBook.Author}}"/>
             </div>
 
             <div class="form-group">
               <label for="inputPages">Pages</label>
-              <input class="form-control" id="inputPages" name="pages" placeholder="Pages" value="{{.Book.Pages}}"/>
+              <input class="form-control" id="inputPages" name="pages" placeholder="Pages" value="{{.TargetBook.Pages}}"/>
             </div>
 
             <div class="form-group">
               <label for="inputPublicationDate">Publication date</label>
-              <input class="form-control" id="inputPublicationDate" name="publicationDate" placeholder="YYYY-MM-DD" value="{{.Book.PublicationDate}}"/>
+              <input class="form-control" id="inputPublicationDate" name="publicationDate" placeholder="YYYY-MM-DD" value="{{.TargetBook.PublicationDate}}"/>
             </div>
 
             <button type="submit" class="btn btn-primary">Submit</button>

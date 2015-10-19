@@ -15,7 +15,7 @@ func handleListBooks(w http.ResponseWriter, r *http.Request) {
 		log.Fatal(err)
 	}
 
-	var page = indexPage{Books: allBooks()}
+	var page = IndexPage{AllBooks: allBooks()}
 	indexPage := string(buf)
 	t := template.Must(template.New("indexPage").Parse(indexPage))
 	t.Execute(w, page)
@@ -29,14 +29,14 @@ func handleViewBook(w http.ResponseWriter, r *http.Request) {
 
 	v := r.URL.Query()
 	idStr := v.Get("id")
-	currentBook := book{}
+	currentBook := Book{}
 	if len(idStr) > 0 {
 		id, _ := strconv.Atoi(idStr)
 
 		currentBook = getBook(id)
 	}
 
-	var page = bookPage{Book: currentBook}
+	var page = BookPage{TargetBook: currentBook}
 	bookPage := string(buf)
 	t := template.Must(template.New("bookPage").Parse(bookPage))
 	t.Execute(w, page)
