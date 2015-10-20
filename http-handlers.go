@@ -1,6 +1,7 @@
 package main
 
 import (
+	"fmt"
 	"io/ioutil"
 	"log"
 	"net/http"
@@ -77,14 +78,37 @@ func handleSaveBook(w http.ResponseWriter, r *http.Request) {
 }
 
 func handleDeleteBook(w http.ResponseWriter, r *http.Request) {
-	v := r.URL.Query()
-	idStr := v.Get("id")
+	params := r.URL.Query()
+	idStr := params.Get("id")
 
 	if len(idStr) > 0 {
-		id, _ := strconv.Atoi(idStr)
+		id, err := strconv.Atoi(idStr)
+		if err == nil {
+			n, err := removeBook(id)
+			if err == nil {
+				fmt.Printf("Rows removed: %v\n", n)
+				http.Redirect(w, r, "/", 302)
+			} else {
+				renderErrorPage(w, err)
+				return
+			}
+		} else {
+			renderErrorPage(w, err)
+			return
+		}
+	}
+}
 
-		removeBook(id)
+func renderErrorPage(w http.ResponseWriter, errorMsg error) {
+	buf, err := ioutil.ReadFile("www/error.html")
+	if err != nil {
+		log.Printf("%v\n", err)
+		fmt.Fprintf(w, "%v\n", err)
+		return
 	}
 
-	http.Redirect(w, r, "/", 302)
+	var page = ErrorPage{ErrorMsg: errorMsg.Error()}
+	errorPage := string(buf)
+	t := template.Must(template.New("errorPage").Parse(errorPage))
+	t.Execute(w, page)
 }

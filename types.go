@@ -22,3 +22,8 @@ type Book struct {
 	PublicationDate time.Time
 	Pages           int
 }
+
+//ErrorPage represents shows an error message, available on "/book.html"
+type ErrorPage struct {
+	ErrorMsg string
+}

@@ -9,23 +9,24 @@ import (
 	"github.com/lib/pq"
 )
 
-func removeBook(bookID int) {
+func removeBook(bookID int) (int, error) {
 	db, err := sql.Open("postgres", "user=postgres dbname=books_database sslmode=disable")
 	if err != nil {
-		log.Fatal(err)
+		return 0, err
 	}
 
 	//Delete
 	res, err := db.Exec(`delete from books where id = $1`, bookID)
 	if err != nil {
-		log.Fatalf("err: %v\n", err)
+		return 0, err
 	}
 
 	rowsDeleted, err := res.RowsAffected()
 	if err != nil {
-		log.Fatalf("err: %v\n", err)
+		return 0, err
 	}
-	fmt.Printf("Number of rows deleted: %v\n", rowsDeleted)
+
+	return int(rowsDeleted), nil
 }
 
 func insertBook(name, author string, pages int, publicationDate time.Time) int {
