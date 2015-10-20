@@ -82,14 +82,15 @@ func allBooks() []Book {
 	return books
 }
 
-func getBook(bookID int) Book {
-	db, err := sql.Open("postgres", "user=postgres dbname=books_database sslmode=disable")
-	if err != nil {
-		log.Fatal(err)
-	}
-
+func getBook(bookID int) (Book, error) {
 	//Retrieve
 	res := Book{}
+
+	db, err := sql.Open("postgres", "user=postgres dbname=books_database sslmode=disable")
+
+	if err != nil {
+		return res, err
+	}
 
 	var id int
 	var name string
@@ -101,7 +102,8 @@ func getBook(bookID int) Book {
 	if err == nil {
 		res = Book{ID: id, Name: name, Author: author, Pages: pages, PublicationDate: publicationDate.Time}
 	}
-	return res
+
+	return res, err
 }
 
 func removeBook(bookID int) (int, error) {

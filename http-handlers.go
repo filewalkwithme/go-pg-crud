@@ -25,16 +25,27 @@ func handleListBooks(w http.ResponseWriter, r *http.Request) {
 func handleViewBook(w http.ResponseWriter, r *http.Request) {
 	buf, err := ioutil.ReadFile("www/book.html")
 	if err != nil {
-		log.Fatal(err)
+		renderErrorPage(w, err)
+		return
 	}
+
+	currentBook := Book{}
 
 	v := r.URL.Query()
 	idStr := v.Get("id")
-	currentBook := Book{}
-	if len(idStr) > 0 {
-		id, _ := strconv.Atoi(idStr)
 
-		currentBook = getBook(id)
+	if len(idStr) > 0 {
+		id, err := strconv.Atoi(idStr)
+		if err != nil {
+			renderErrorPage(w, err)
+			return
+		}
+
+		currentBook, err = getBook(id)
+		if err != nil {
+			renderErrorPage(w, err)
+			return
+		}
 	}
 
 	var page = BookPage{TargetBook: currentBook}
