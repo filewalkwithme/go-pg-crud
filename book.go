@@ -9,26 +9,6 @@ import (
 	"github.com/lib/pq"
 )
 
-func removeBook(bookID int) (int, error) {
-	db, err := sql.Open("postgres", "user=postgres dbname=books_database sslmode=disable")
-	if err != nil {
-		return 0, err
-	}
-
-	//Delete
-	res, err := db.Exec(`delete from books where id = $1`, bookID)
-	if err != nil {
-		return 0, err
-	}
-
-	rowsDeleted, err := res.RowsAffected()
-	if err != nil {
-		return 0, err
-	}
-
-	return int(rowsDeleted), nil
-}
-
 func insertBook(name, author string, pages int, publicationDate time.Time) int {
 	db, err := sql.Open("postgres", "user=postgres dbname=books_database sslmode=disable")
 	if err != nil {
@@ -122,4 +102,24 @@ func getBook(bookID int) Book {
 		res = Book{ID: id, Name: name, Author: author, Pages: pages, PublicationDate: publicationDate.Time}
 	}
 	return res
+}
+
+func removeBook(bookID int) (int, error) {
+	db, err := sql.Open("postgres", "user=postgres dbname=books_database sslmode=disable")
+	if err != nil {
+		return 0, err
+	}
+
+	//Delete
+	res, err := db.Exec(`delete from books where id = $1`, bookID)
+	if err != nil {
+		return 0, err
+	}
+
+	rowsDeleted, err := res.RowsAffected()
+	if err != nil {
+		return 0, err
+	}
+
+	return int(rowsDeleted), nil
 }

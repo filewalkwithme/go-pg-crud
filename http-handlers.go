@@ -87,7 +87,6 @@ func handleDeleteBook(w http.ResponseWriter, r *http.Request) {
 			n, err := removeBook(id)
 			if err == nil {
 				fmt.Printf("Rows removed: %v\n", n)
-				http.Redirect(w, r, "/", 302)
 			} else {
 				renderErrorPage(w, err)
 				return
@@ -97,6 +96,7 @@ func handleDeleteBook(w http.ResponseWriter, r *http.Request) {
 			return
 		}
 	}
+	http.Redirect(w, r, "/", 302)
 }
 
 func renderErrorPage(w http.ResponseWriter, errorMsg error) {
