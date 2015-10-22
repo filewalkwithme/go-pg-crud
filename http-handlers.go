@@ -10,29 +10,84 @@ import (
 	"time"
 )
 
-func handleListBooks(w http.ResponseWriter, r *http.Request) {
-	buf, err := ioutil.ReadFile("www/index.html")
-	if err != nil {
-		log.Fatal(err)
+func handleSaveBook(w http.ResponseWriter, r *http.Request) {
+	var id = 0
+	var err error
+
+	r.ParseForm()
+	params := r.PostForm
+	idStr := params.Get("id")
+
+	if len(idStr) > 0 {
+		id, err = strconv.Atoi(idStr)
+		if err != nil {
+			renderErrorPage(w, err)
+			return
+		}
 	}
 
-	var page = IndexPage{AllBooks: allBooks()}
+	name := params.Get("name")
+	author := params.Get("author")
+
+	pagesStr := params.Get("pages")
+	pages := 0
+	if len(pagesStr) > 0 {
+		pages, err = strconv.Atoi(pagesStr)
+		if err != nil {
+			renderErrorPage(w, err)
+			return
+		}
+	}
+
+	publicationDateStr := params.Get("publicationDate")
+	var publicationDate time.Time
+
+	if len(publicationDateStr) > 0 {
+		publicationDate, err = time.Parse("2006-01-02", publicationDateStr)
+		if err != nil {
+			renderErrorPage(w, err)
+			return
+		}
+	}
+
+	if id == 0 {
+		_, err = insertBook(name, author, pages, publicationDate)
+	} else {
+		_, err = updateBook(id, name, author, pages, publicationDate)
+	}
+
+	if err != nil {
+		renderErrorPage(w, err)
+		return
+	}
+
+	http.Redirect(w, r, "/", 302)
+}
+
+func handleListBooks(w http.ResponseWriter, r *http.Request) {
+	books, err := allBooks()
+	if err != nil {
+		renderErrorPage(w, err)
+		return
+	}
+
+	buf, err := ioutil.ReadFile("www/index.html")
+	if err != nil {
+		renderErrorPage(w, err)
+		return
+	}
+
+	var page = IndexPage{AllBooks: books}
 	indexPage := string(buf)
 	t := template.Must(template.New("indexPage").Parse(indexPage))
 	t.Execute(w, page)
 }
 
 func handleViewBook(w http.ResponseWriter, r *http.Request) {
-	buf, err := ioutil.ReadFile("www/book.html")
-	if err != nil {
-		renderErrorPage(w, err)
-		return
-	}
+	params := r.URL.Query()
+	idStr := params.Get("id")
 
-	currentBook := Book{}
-
-	v := r.URL.Query()
-	idStr := v.Get("id")
+	var currentBook = Book{}
 
 	if len(idStr) > 0 {
 		id, err := strconv.Atoi(idStr)
@@ -48,44 +103,16 @@ func handleViewBook(w http.ResponseWriter, r *http.Request) {
 		}
 	}
 
+	buf, err := ioutil.ReadFile("www/book.html")
+	if err != nil {
+		renderErrorPage(w, err)
+		return
+	}
+
 	var page = BookPage{TargetBook: currentBook}
 	bookPage := string(buf)
 	t := template.Must(template.New("bookPage").Parse(bookPage))
 	t.Execute(w, page)
-}
-
-func handleSaveBook(w http.ResponseWriter, r *http.Request) {
-	r.ParseForm()
-	v := r.PostForm
-	idStr := v.Get("id")
-	id := 0
-	if len(idStr) > 0 {
-		id, _ = strconv.Atoi(idStr)
-	}
-
-	name := v.Get("name")
-	author := v.Get("author")
-
-	pagesStr := v.Get("pages")
-	pages := 0
-	if len(pagesStr) > 0 {
-		pages, _ = strconv.Atoi(pagesStr)
-	}
-
-	publicationDateStr := v.Get("publicationDate")
-	var publicationDate time.Time
-
-	if len(publicationDateStr) > 0 {
-		publicationDate, _ = time.Parse("2006-01-02", publicationDateStr)
-	}
-
-	if id == 0 {
-		insertBook(name, author, pages, publicationDate)
-	} else {
-		updateBook(id, name, author, pages, publicationDate)
-	}
-
-	http.Redirect(w, r, "/", 302)
 }
 
 func handleDeleteBook(w http.ResponseWriter, r *http.Request) {
@@ -94,18 +121,18 @@ func handleDeleteBook(w http.ResponseWriter, r *http.Request) {
 
 	if len(idStr) > 0 {
 		id, err := strconv.Atoi(idStr)
-		if err == nil {
-			n, err := removeBook(id)
-			if err == nil {
-				fmt.Printf("Rows removed: %v\n", n)
-			} else {
-				renderErrorPage(w, err)
-				return
-			}
-		} else {
+		if err != nil {
 			renderErrorPage(w, err)
 			return
 		}
+
+		n, err := removeBook(id)
+		if err != nil {
+			renderErrorPage(w, err)
+			return
+		}
+
+		fmt.Printf("Rows removed: %v\n", n)
 	}
 	http.Redirect(w, r, "/", 302)
 }

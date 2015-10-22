@@ -3,54 +3,42 @@ package main
 import (
 	"database/sql"
 	"fmt"
-	"log"
 	"time"
 
 	"github.com/lib/pq"
 )
 
-func insertBook(name, author string, pages int, publicationDate time.Time) int {
+func getBook(bookID int) (Book, error) {
+	//Retrieve
+	res := Book{}
+
 	db, err := sql.Open("postgres", "user=postgres dbname=books_database sslmode=disable")
 	if err != nil {
-		log.Fatal(err)
+		return res, err
 	}
 
-	//Create
-	var bookID int
-	err = db.QueryRow(`INSERT INTO books(name, author, pages, publication_date) VALUES($1, $2, $3, $4) RETURNING id`, name, author, pages, publicationDate).Scan(&bookID)
+	var id int
+	var name string
+	var author string
+	var pages int
+	var publicationDate pq.NullTime
 
-	if err != nil {
-		log.Fatal(err)
+	err = db.QueryRow(`SELECT id, name, author, pages, publication_date FROM books where id = $1`, bookID).Scan(&id, &name, &author, &pages, &publicationDate)
+	if err == nil {
+		res = Book{ID: id, Name: name, Author: author, Pages: pages, PublicationDate: publicationDate.Time}
 	}
-	fmt.Printf("Last inserted ID: %v\n", bookID)
-	return bookID
+
+	return res, err
 }
 
-func updateBook(id int, name, author string, pages int, publicationDate time.Time) int {
-	db, err := sql.Open("postgres", "user=postgres dbname=books_database sslmode=disable")
-	if err != nil {
-		log.Fatal(err)
-	}
-
-	//Create
-	var bookID int
-	err = db.QueryRow(`UPDATE books set name=$1, author=$2, pages=$3, publication_date=$4 where id=$5 RETURNING id`, name, author, pages, publicationDate, id).Scan(&bookID)
-
-	if err != nil {
-		log.Fatal(err)
-	}
-	fmt.Printf("Update ID: %v\n", bookID)
-	return bookID
-}
-
-func allBooks() []Book {
-	db, err := sql.Open("postgres", "user=postgres dbname=books_database sslmode=disable")
-	if err != nil {
-		log.Fatal(err)
-	}
-
+func allBooks() ([]Book, error) {
 	//Retrieve
 	books := []Book{}
+
+	db, err := sql.Open("postgres", "user=postgres dbname=books_database sslmode=disable")
+	if err != nil {
+		return books, err
+	}
 
 	rows, err := db.Query(`SELECT id, name, author, pages, publication_date FROM books order by id`)
 	defer rows.Close()
@@ -71,39 +59,52 @@ func allBooks() []Book {
 
 				books = append(books, currentBook)
 			} else {
-				log.Fatalf("err: %v\n", err)
+				return books, err
 			}
-
 		}
 	} else {
-		log.Fatalf("err: %v\n", err)
+		return books, err
 	}
 
-	return books
+	return books, err
 }
 
-func getBook(bookID int) (Book, error) {
-	//Retrieve
-	res := Book{}
-
+func insertBook(name, author string, pages int, publicationDate time.Time) (int, error) {
 	db, err := sql.Open("postgres", "user=postgres dbname=books_database sslmode=disable")
+	if err != nil {
+		return 0, err
+	}
+
+	//Create
+	var bookID int
+	err = db.QueryRow(`INSERT INTO books(name, author, pages, publication_date) VALUES($1, $2, $3, $4) RETURNING id`, name, author, pages, publicationDate).Scan(&bookID)
 
 	if err != nil {
-		return res, err
+		return 0, err
 	}
 
-	var id int
-	var name string
-	var author string
-	var pages int
-	var publicationDate pq.NullTime
+	fmt.Printf("Last inserted ID: %v\n", bookID)
+	return bookID, err
+}
 
-	err = db.QueryRow(`SELECT id, name, author, pages, publication_date FROM books where id = $1`, bookID).Scan(&id, &name, &author, &pages, &publicationDate)
-	if err == nil {
-		res = Book{ID: id, Name: name, Author: author, Pages: pages, PublicationDate: publicationDate.Time}
+func updateBook(id int, name, author string, pages int, publicationDate time.Time) (int, error) {
+	db, err := sql.Open("postgres", "user=postgres dbname=books_database sslmode=disable")
+	if err != nil {
+		return 0, err
 	}
 
-	return res, err
+	//Create
+	res, err := db.Exec(`UPDATE books set name=$1, author=$2, pages=$3, publication_date=$4 where id=$5 RETURNING id`, name, author, pages, publicationDate, id)
+	if err != nil {
+		return 0, err
+	}
+
+	rowsUpdated, err := res.RowsAffected()
+	if err != nil {
+		return 0, err
+	}
+
+	return int(rowsUpdated), err
 }
 
 func removeBook(bookID int) (int, error) {
