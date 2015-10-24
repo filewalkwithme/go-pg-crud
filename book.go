@@ -1,7 +1,6 @@
 package main
 
 import (
-	"database/sql"
 	"fmt"
 	"time"
 
@@ -12,18 +11,13 @@ func getBook(bookID int) (Book, error) {
 	//Retrieve
 	res := Book{}
 
-	db, err := sql.Open("postgres", "user=postgres dbname=books_database sslmode=disable")
-	if err != nil {
-		return res, err
-	}
-
 	var id int
 	var name string
 	var author string
 	var pages int
 	var publicationDate pq.NullTime
 
-	err = db.QueryRow(`SELECT id, name, author, pages, publication_date FROM books where id = $1`, bookID).Scan(&id, &name, &author, &pages, &publicationDate)
+	err := db.QueryRow(`SELECT id, name, author, pages, publication_date FROM books where id = $1`, bookID).Scan(&id, &name, &author, &pages, &publicationDate)
 	if err == nil {
 		res = Book{ID: id, Name: name, Author: author, Pages: pages, PublicationDate: publicationDate.Time}
 	}
@@ -34,11 +28,6 @@ func getBook(bookID int) (Book, error) {
 func allBooks() ([]Book, error) {
 	//Retrieve
 	books := []Book{}
-
-	db, err := sql.Open("postgres", "user=postgres dbname=books_database sslmode=disable")
-	if err != nil {
-		return books, err
-	}
 
 	rows, err := db.Query(`SELECT id, name, author, pages, publication_date FROM books order by id`)
 	defer rows.Close()
@@ -70,14 +59,9 @@ func allBooks() ([]Book, error) {
 }
 
 func insertBook(name, author string, pages int, publicationDate time.Time) (int, error) {
-	db, err := sql.Open("postgres", "user=postgres dbname=books_database sslmode=disable")
-	if err != nil {
-		return 0, err
-	}
-
 	//Create
 	var bookID int
-	err = db.QueryRow(`INSERT INTO books(name, author, pages, publication_date) VALUES($1, $2, $3, $4) RETURNING id`, name, author, pages, publicationDate).Scan(&bookID)
+	err := db.QueryRow(`INSERT INTO books(name, author, pages, publication_date) VALUES($1, $2, $3, $4) RETURNING id`, name, author, pages, publicationDate).Scan(&bookID)
 
 	if err != nil {
 		return 0, err
@@ -88,11 +72,6 @@ func insertBook(name, author string, pages int, publicationDate time.Time) (int,
 }
 
 func updateBook(id int, name, author string, pages int, publicationDate time.Time) (int, error) {
-	db, err := sql.Open("postgres", "user=postgres dbname=books_database sslmode=disable")
-	if err != nil {
-		return 0, err
-	}
-
 	//Create
 	res, err := db.Exec(`UPDATE books set name=$1, author=$2, pages=$3, publication_date=$4 where id=$5 RETURNING id`, name, author, pages, publicationDate, id)
 	if err != nil {
@@ -108,11 +87,6 @@ func updateBook(id int, name, author string, pages int, publicationDate time.Tim
 }
 
 func removeBook(bookID int) (int, error) {
-	db, err := sql.Open("postgres", "user=postgres dbname=books_database sslmode=disable")
-	if err != nil {
-		return 0, err
-	}
-
 	//Delete
 	res, err := db.Exec(`delete from books where id = $1`, bookID)
 	if err != nil {
