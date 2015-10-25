@@ -88,6 +88,7 @@ func handleViewBook(w http.ResponseWriter, r *http.Request) {
 	idStr := params.Get("id")
 
 	var currentBook = Book{}
+	currentBook.PublicationDate = time.Now()
 
 	if len(idStr) > 0 {
 		id, err := strconv.Atoi(idStr)
@@ -112,7 +113,11 @@ func handleViewBook(w http.ResponseWriter, r *http.Request) {
 	var page = BookPage{TargetBook: currentBook}
 	bookPage := string(buf)
 	t := template.Must(template.New("bookPage").Parse(bookPage))
-	t.Execute(w, page)
+	err = t.Execute(w, page)
+	if err != nil {
+		renderErrorPage(w, err)
+		return
+	}
 }
 
 func handleDeleteBook(w http.ResponseWriter, r *http.Request) {
